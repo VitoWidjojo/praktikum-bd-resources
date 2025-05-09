@@ -75,16 +75,18 @@ public class LoginController {
 
                 // Load the correct view based on the role
                 if (role.equals("Admin")) {
-                    // Load the admin view
-                    app.getPrimaryStage().setTitle("Admin View");
-
+                    app.getPrimaryStage().setTitle("Admin control");
                     // Load fxml and set the scene
                     FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("admin-view.fxml"));
                     Scene scene = new Scene(loader.load());
                     app.getPrimaryStage().setScene(scene);
                 } else {
+                    app.getPrimaryStage().setTitle("Welcome, student");
                     // Load the user view
-                    app.getHostServices().showDocument("user-view.fxml");
+
+                    FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("student-view.fxml"));
+                    Scene scene = new Scene(loader.load());
+                    app.getPrimaryStage().setScene(scene);
                 }
             } else {
                 // Show an error message
@@ -101,6 +103,7 @@ public class LoginController {
             alert.setContentText("Could not connect to the database. Please try again later.");
             alert.showAndWait();
         } catch (IOException e) {
+            System.out.println(e.getMessage());
             throw new RuntimeException(e);
         }
     }
