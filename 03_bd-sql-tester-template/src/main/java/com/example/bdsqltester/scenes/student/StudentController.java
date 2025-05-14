@@ -145,6 +145,15 @@ public class StudentController {
             if(keyRS.getMetaData().getColumnCount()==studentRS.getMetaData().getColumnCount() &&
                 !mainStmt.executeQuery("("+studentQuery+" except "+keyQuery+") union ("+keyQuery+" except "+studentQuery+")").next()){
                 //we have known the contents are the same, we need to check if they are ordered.
+                while (keyRS.next()) {
+                    for (int i = 0; i < keyRS.getMetaData().getColumnCount(); i++) {
+                        if(studentRS.getString(i)!=keyRS.getString(i)){
+                            return 50;
+                        }
+                    }
+                }
+                //it passed al inspection!
+                return 100;
             } else{
                 return 0;
             }
@@ -157,6 +166,7 @@ public class StudentController {
             errorAlert.setTitle("Database Error");
             errorAlert.setHeaderText("Your query may have a syntax error.");
             errorAlert.showAndWait();
+            return 0;
         } catch (Exception e) {
             // Catch other potential exceptions (e.g., class loading if driver not found)
             e.printStackTrace(); // Print stack trace to console/log for debugging
@@ -166,7 +176,8 @@ public class StudentController {
             errorAlert.setContentText(e.getMessage());
             errorAlert.showAndWait();
         }
-        return 100;
+        //emergency case. if an error happened.
+        return 0;
 
     }
     //for test
