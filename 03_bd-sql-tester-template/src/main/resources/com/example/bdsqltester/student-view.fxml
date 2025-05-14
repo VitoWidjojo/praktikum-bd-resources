@@ -13,18 +13,15 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<SplitPane dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bdsqltester.scenes.student.StudentController">
+<SplitPane dividerPositions="0.33333, 0.66667" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="816.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bdsqltester.scenes.student.StudentController">
    <items>
       <VBox alignment="TOP_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
          <children>
-            <ListView fx:id="assignmentList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-               <VBox.margin>
-                  <Insets top="8.0" />
-               </VBox.margin>
-            </ListView>
+            <VBox prefHeight="200.0" prefWidth="100.0" />
          </children>
       </VBox>
-      <VBox prefHeight="200.0" prefWidth="100.0">
+      <ListView fx:id="assignmentList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="303.0" />
+      <VBox prefHeight="384.0" prefWidth="201.0">
          <children>
             <GridPane>
               <columnConstraints>
@@ -62,6 +59,7 @@
                <children>
                   <HBox HBox.hgrow="ALWAYS" />
                   <Button fx:id="runQuery" mnemonicParsing="false" onAction="#OnRunQuery" text="Run query" />
+                  <Button fx:id="gradeQuery" mnemonicParsing="false" text="Grade query" />
                </children>
             </HBox>
             <GridPane snapToPixel="false" translateY="20.0">

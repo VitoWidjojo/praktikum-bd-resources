@@ -6,7 +6,6 @@ import com.example.bdsqltester.dtos.Assignment;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -34,7 +33,8 @@ public class StudentController {
 
     @FXML
     private TextField gradeField;
-
+    @FXML
+    private Button gradeQuery;
     @FXML
     private Button runQuery;
     private final ObservableList<Assignment> assignments = FXCollections.observableArrayList();
@@ -126,9 +126,52 @@ public class StudentController {
         answerField.setText("--type your answer here");
     }
 
-    //for test and save
+    int CheckGrade(){
+        try (//Connect to HR (Main)
+             Connection mainConn = MainDataSource.getConnection();
+             Statement mainStmt = mainConn.createStatement();
+             //Connect to grading and get key answer
+             Connection keyConn = GradingDataSource.getConnection();
+             Statement keyStmt = keyConn.createStatement();
+             )
+        {
+            //student's answer
+            String studentQuery=answerField.getText();
+            ResultSet studentRS= mainStmt.executeQuery(studentQuery);
+            //key answer
+            String keyQuery    =keyStmt.executeQuery("Select * from assignments where id="+idField.getText()).getString("answer_key");
+            ResultSet keyRS= mainStmt.executeQuery(keyQuery);
+            //column count matches           //union two table, checks for residue. handles different data and different row count. we want NO residues.
+            if(keyRS.getMetaData().getColumnCount()==studentRS.getMetaData().getColumnCount() &&
+                !mainStmt.executeQuery("("+studentQuery+" except "+keyQuery+") union ("+keyQuery+" except "+studentQuery+")").next()){
+                //we have known the contents are the same, we need to check if they are ordered.
+            } else{
+                return 0;
+            }
+
+
+        } catch (SQLException e) {
+            // Log the error and show an alert to the user
+            e.printStackTrace(); // Print stack trace to console/log for debugging
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Database Error");
+            errorAlert.setHeaderText("Your query may have a syntax error.");
+            errorAlert.showAndWait();
+        } catch (Exception e) {
+            // Catch other potential exceptions (e.g., class loading if driver not found)
+            e.printStackTrace(); // Print stack trace to console/log for debugging
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("An unexpected error occurred.");
+            errorAlert.setContentText(e.getMessage());
+            errorAlert.showAndWait();
+        }
+        return 100;
+
+    }
+    //for test
     @FXML
-    void OnRunQuery(ActionEvent event) {
+    void OnRunQuery() {
         // Display a window containing the results of the query.
 
         // Create a new window/stage
@@ -143,10 +186,11 @@ public class StudentController {
 
         // Use try-with-resources for automatic closing of Connection, Statement, ResultSet
         try (Connection conn = GradingDataSource.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(answerField.getText())) {
+             Statement gradStmt = conn.createStatement();
+             ResultSet gradRs = gradStmt.executeQuery(answerField.getText());
+             ) {
 
-            ResultSetMetaData metaData = rs.getMetaData();
+            ResultSetMetaData metaData = gradRs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
             // 1. Get Headers and Create Table Columns
@@ -172,11 +216,11 @@ public class StudentController {
             }
 
             // 2. Get Data Rows
-            while (rs.next()) {
+            while (gradRs.next()) {
                 ArrayList<String> row = new ArrayList<>();
                 for (int i = 1; i <= columnCount; i++) {
                     // Retrieve all data as String. Handle NULLs gracefully.
-                    String value = rs.getString(i);
+                    String value = gradRs.getString(i);
                     row.add(value != null ? value : ""); // Add empty string for SQL NULL
                 }
                 data.add(row);
@@ -210,8 +254,7 @@ public class StudentController {
             e.printStackTrace(); // Print stack trace to console/log for debugging
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Database Error");
-            errorAlert.setHeaderText("Failed to execute query or retrieve results.");
-            errorAlert.setContentText("SQL Error: " + e.getMessage());
+            errorAlert.setHeaderText("Your query may have a syntax error.");
             errorAlert.showAndWait();
         } catch (Exception e) {
             // Catch other potential exceptions (e.g., class loading if driver not found)
@@ -223,4 +266,8 @@ public class StudentController {
             errorAlert.showAndWait();
         }
     } // End of OnRunQuery method
+
+    void DoGrading(){
+
+    }
 }
